@@ -50,6 +50,8 @@ public class HdfsTmpCleanup {
         recursive = arguments.recursive;
 
         Configuration conf = new Configuration();
+        conf.addResource(new Path("/etc/hadoop/conf/core-site.xml"));
+        conf.addResource(new Path("/etc/hadoop/conf/hdfs-site.xml"));
         fs = FileSystem.get(URI.create(uri), conf);
         Path path = new Path(arguments.path);
         System.out.println("Listing files...");
@@ -58,6 +60,7 @@ public class HdfsTmpCleanup {
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }
+        zabbixSend(count);
     }
 
     public static void cleanup(Path path) throws Exception {
@@ -66,15 +69,17 @@ public class HdfsTmpCleanup {
             LocatedFileStatus stat = fileStatusIterator.next();
             if (isOutdated(secCleanup, stat.getModificationTime())) {
                 if (recursive) {
+                    System.out.printf("%d: Deleting path %s recursively \t mtime: %s\n", count, stat.getPath(), new Date(stat.getModificationTime()).toString());
                     fs.deleteOnExit(stat.getPath());
                     count++;
-                    System.out.printf("%d: Deleting path %s recursively \t mtime: %s\n", count, stat.getPath(), new Date(stat.getModificationTime()).toString());
                 } else if (stat.isFile()) {
                     System.out.printf("Deleting path (file) %s \t mtime: %s\n", stat.getPath(), new Date(stat.getModificationTime()).toString());
                     fs.delete(stat.getPath(), false);
+                    count++;
                 } else if (fs.listStatus(stat.getPath()).length == 0) {
                     System.out.format("Deleting path (dir) (len: %d) %s \t mtime: %s\n", fs.listStatus(stat.getPath()).length, stat.getPath(), new Date(stat.getModificationTime()));
                     fs.delete(stat.getPath(), true);
+                    count++;
                 } else {
                     cleanup(stat.getPath());
                     cleanup(path);
@@ -89,5 +94,11 @@ public class HdfsTmpCleanup {
             return true;
         }
         return false;
+    }
+
+    public static int zabbixSend(long data) throws Exception {
+        Process p = Runtime.getRuntime().exec(String.format("zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k 'hdfs.cleanup' -o %d -vv", data));
+        p.waitFor();
+        return (p.exitValue());
     }
 }

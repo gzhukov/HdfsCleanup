@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/hdfs-cleanup.iml" filepath="$PROJECT_DIR$/hdfs-cleanup.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HdfsCleanup.iml" filepath="$PROJECT_DIR$/HdfsCleanup.iml" />
     </modules>
   </component>
 </project>
