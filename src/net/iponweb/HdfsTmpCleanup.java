@@ -1,5 +1,3 @@
-package net.iponweb;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import org.apache.hadoop.conf.Configuration;

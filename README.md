@@ -2,7 +2,8 @@
 Small java hdfs cleanup implementation
 
 Usage:
-java -jar hdfs-cleanup.jar -p /tmp/ -ts 3600
+> java -jar hdfs-cleanup.jar -p /tmp/ -ts 3600
+
 Params:
 "-path", "-p" - "HDFS path"
 "-ts" - "Cleanup before date.now() - ts", default: 86400; // 24h
